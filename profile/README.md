@@ -1,7 +1,6 @@
 ## Hi there 👋
 
-These are Linkbaby Repos.
-Keep all of them PRIVATE !!!!
+
 
 <!--
 
