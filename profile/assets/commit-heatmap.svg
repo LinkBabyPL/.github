@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="164" viewBox="0 0 840 164" role="img" aria-label="Thirteen-week commit heatmap pending GitHub token configuration">
+<rect width="840" height="164" rx="14" fill="#0d1117"/>
+<text x="28" y="44" font-size="20" font-family="sans-serif" fill="#e6edf3">13-week commit activity</text>
+<text x="28" y="78" font-size="15" font-family="sans-serif" fill="#8b949e">Pending first authorized refresh of private and public repositories</text>
+<text x="28" y="111" font-size="13" font-family="sans-serif" fill="#8b949e">Configure LINKBABY_DASHBOARD_TOKEN and run Refresh organization dashboard</text>
+</svg>
