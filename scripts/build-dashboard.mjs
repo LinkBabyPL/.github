@@ -55,7 +55,32 @@ const dayCounts = new Map();
 for (let i = 0; i < 91; i++) dayCounts.set(isoDay(new Date(firstDay.getTime() + i * 86400000)), 0);
 
 const repos = await pages('/orgs/' + ORG + '/repos?type=all&sort=pushed&direction=desc', { limit: 10 });
-if (!repos.length) throw new Error('No repositories returned. Check token organization access.');
+// Access control for this public dashboard: never silently publish a public-only
+// snapshot if the read-only credential loses private organization access.
+// Update these baselines when repositories are intentionally removed.
+const MIN_EXPECTED_REPOS = 20;
+const MIN_EXPECTED_PRIVATE = 19;
+const REQUIRED_PRIVATE_NAMES = [
+  'browser-automation-runtime',
+  'django-at-pythonanywhere',
+  'powerbi-management-cockpit'
+];
+const visiblePrivate = repos.filter(r => r.private);
+const names = new Set(visiblePrivate.map(r => r.name));
+const missing = REQUIRED_PRIVATE_NAMES.filter(name => !names.has(name));
+if (repos.length < MIN_EXPECTED_REPOS ||
+    visiblePrivate.length < MIN_EXPECTED_PRIVATE ||
+    missing.length) {
+  throw new Error(
+    'Incomplete GitHub token coverage: found ' + repos.length + ' repositories (' +
+    visiblePrivate.length + ' private), expected at least ' + MIN_EXPECTED_REPOS +
+    ' total / ' + MIN_EXPECTED_PRIVATE + ' private. Missing key private repos: ' +
+    (missing.join(', ') || 'none') +
+    '. Check fine-grained PAT Resource owner = LinkBabyPL, repository access = All repositories, ' +
+    'organization approval, and Actions secret LINKBABY_DASHBOARD_TOKEN. ' +
+    'Aborting to preserve the previous dashboard instead of publishing incorrect zeros.'
+  );
+}
 const states = [];
 for (let i = 0; i < repos.length; i += 4) {
   const group = await Promise.all(repos.slice(i, i + 4).map(async repo => {
