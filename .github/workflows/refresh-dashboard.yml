@@ -1,0 +1,51 @@
+name: Refresh organization dashboard
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 5 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: organization-profile-dashboard
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out dashboard repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Verify private-repository read credential
+        env:
+          DASHBOARD_TOKEN: ${{ secrets.LINKBABY_DASHBOARD_TOKEN }}
+        run: |
+          if [ -z "$DASHBOARD_TOKEN" ]; then
+            echo "::error::Configure LINKBABY_DASHBOARD_TOKEN with read-only access to all LinkBabyPL repositories, issues, metadata and actions."
+            exit 1
+          fi
+
+      - name: Generate dashboard from GitHub API
+        env:
+          DASHBOARD_TOKEN: ${{ secrets.LINKBABY_DASHBOARD_TOKEN }}
+        run: node scripts/build-dashboard.mjs
+
+      - name: Commit updated dashboard
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add profile/README.md profile/assets/commit-heatmap.svg
+          if git diff --cached --quiet; then
+            echo "No dashboard changes"
+            exit 0
+          fi
+          git commit -m "chore: refresh organization activity dashboard"
+          git -c http.extraheader="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)" push origin HEAD:main
