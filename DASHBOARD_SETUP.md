@@ -7,9 +7,10 @@ This organization profile is public. It intentionally displays private repositor
 1. In `LinkBabyPL/.github`, visit **Settings → Secrets and variables → Actions → New repository secret**.
 2. Name it `LINKBABY_DASHBOARD_TOKEN`.
 3. Provide a fine-grained PAT owned by an account that can read all LinkBabyPL repositories, including private repositories. Repository access: **All repositories** (subject to organization policy). Minimum permissions: **Metadata: Read**; **Contents: Read** (for commits); **Issues: Read**; **Pull requests: Read**; **Actions: Read** for CI status. Do not grant write permissions to this PAT.
-4. If your organization requires PAT approval or SSO authorization, complete that in GitHub. Do not paste your token into README files or chats.
-5. Go to **Actions → Refresh organization dashboard → Run workflow**. It also runs daily at 05:17 UTC.
-6. Confirm the job finishes successfully and refreshes `profile/README.md` and `profile/assets/commit-heatmap.svg`.
+4. **Critical:** Check the fine-grained token's **Resource owner = LinkBabyPL** (not the user account), **Repository access = All repositories**, and organization approval / SSO authorization. GitHub's public organization repositories endpoint can return only public repositories even while the token is accepted. Do not paste your token into README files or chats.
+5. After the workflow runs, verify the summary is at least **20 total / 19 private**. The generator now refuses to publish a public-only snapshot. The baseline must be updated intentionally if repositories are removed.
+6. Go to **Actions → Refresh organization dashboard → Run workflow**. It also runs daily at 05:17 UTC.
+7. Confirm the job finishes successfully and refreshes `profile/README.md` and `profile/assets/commit-heatmap.svg`.
 
 The workflow uses a separate built-in `GITHUB_TOKEN` with `contents: write` for committing changes to the public profile repository. The read-only token is for private organization data and does not itself write.
 
